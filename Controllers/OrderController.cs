@@ -28,7 +28,7 @@ namespace HighThroughputApi.Controllers
         }
 
         [HttpGet("customer/{id}")]
-        public async Task<ActionResult<List<Models.Order>>> GetOrdersByCustomer(int id)
+        public async Task<ActionResult<List<OrderDto>>> GetOrdersByCustomer(int id)
         {
             var orders = await _context.Orders
                 .Where(o => o.CustomerId == id)
@@ -37,7 +37,16 @@ namespace HighThroughputApi.Controllers
             if (orders == null)
                 return NotFound();
 
-            return orders;
+            List<OrderDto> orderList = new();
+            foreach (var order in orders)
+            {
+                OrderDto orderDto = new OrderDto(); 
+                orderDto.Id = order.Id;
+                orderDto.OrderItems = order.OrderItems;
+                orderList.Add(orderDto);
+            }
+
+            return orderList;
         }
 
         [HttpGet("{id}")]
