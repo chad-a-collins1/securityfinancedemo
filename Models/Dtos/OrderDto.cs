@@ -3,7 +3,6 @@
     public class OrderDto
     {
         public int Id { get; set; }
-        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-
-    }    
+        public List<OrderItemDto> OrderItemsDto { get; set; }
+    }
 }

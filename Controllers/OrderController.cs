@@ -32,21 +32,20 @@ namespace HighThroughputApi.Controllers
         {
             var orders = await _context.Orders
                 .Where(o => o.CustomerId == id)
-                .Include(o => o.OrderItems).ToListAsync();
+                .Include(o => o.OrderItems)
+                .ToListAsync();
 
-            if (orders == null)
+            if (orders == null || !orders.Any())
                 return NotFound();
 
-            List<OrderDto> orderList = new();
-            foreach (var order in orders)
+            var orderDtos = orders.Select(order => new OrderDto
             {
-                OrderDto orderDto = new OrderDto(); 
-                orderDto.Id = order.Id;
-                orderDto.OrderItems = order.OrderItems;
-                orderList.Add(orderDto);
-            }
+                Id = order.Id,
+                OrderItemsDto = order.OrderItems.Select(oi => new OrderItemDto(oi.ItemId, oi.Quantity)).ToList()
+                    
+            }).ToList();
 
-            return orderList;
+            return orderDtos;
         }
 
         [HttpGet("{id}")]
