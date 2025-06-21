@@ -41,7 +41,7 @@ namespace HighThroughputApi.Controllers
             var orderDtos = orders.Select(order => new OrderDto
             {
                 Id = order.Id,
-                OrderItemsDto = order.OrderItems.Select(oi => new OrderItemDto(oi.ItemId, oi.Quantity)).ToList()
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDto(oi.ItemId, oi.Quantity)).ToList()
                     
             }).ToList();
 
