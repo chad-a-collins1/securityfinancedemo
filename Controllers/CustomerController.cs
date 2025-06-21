@@ -17,10 +17,10 @@ namespace HighThroughputApi.Controllers
             _context = context;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CreateCustomerDto>> GetCustomer(int id)
+        [HttpGet]
+        public async Task<ActionResult<CreateCustomerDto>> GetCustomer(string email)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customers.Where(c => c.Email == email).FirstOrDefaultAsync();
             if (customer == null)
                 return NotFound();
 
@@ -55,21 +55,21 @@ namespace HighThroughputApi.Controllers
             });
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CreateCustomerDto>>> GetAllCustomers()
-        {
-            var customers = await _context.Customers.ToListAsync();
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<CreateCustomerDto>>> GetAllCustomers()
+        //{
+        //    var customers = await _context.Customers.ToListAsync();
 
-            return customers
-                .Select(c => new CreateCustomerDto
-                {
-                    Id = c.Id,
-                    FirstName = c.FirstName,
-                    LastName = c.LastName,
-                    Email = c.Email
-                })
-                .ToList();
-        }
+        //    return customers
+        //        .Select(c => new CreateCustomerDto
+        //        {
+        //            Id = c.Id,
+        //            FirstName = c.FirstName,
+        //            LastName = c.LastName,
+        //            Email = c.Email
+        //        })
+        //        .ToList();
+        //}
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
