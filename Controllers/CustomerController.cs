@@ -27,8 +27,6 @@ namespace HighThroughputApi.Controllers
             return new CreateCustomerDto
             {
                 Id = customer.Id,
-                FirstName = customer.FirstName,
-                LastName = customer.LastName,
                 Email = customer.Email
             };
         }
@@ -38,8 +36,6 @@ namespace HighThroughputApi.Controllers
         {
             var customer = new Customer
             {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
                 Email = dto.Email
             };
 
@@ -49,8 +45,6 @@ namespace HighThroughputApi.Controllers
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, new CreateCustomerDto
             {
                 Id = customer.Id,
-                FirstName = customer.FirstName,
-                LastName = customer.LastName,
                 Email = customer.Email
             });
         }
