@@ -41,7 +41,7 @@ namespace HighThroughputApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrder([FromHeader(Name = "If-Match")] string ifMatch, int id)
+        public async Task<ActionResult<Order>> GetOrder(int id)
         {
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
