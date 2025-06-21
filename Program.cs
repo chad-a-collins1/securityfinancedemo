@@ -56,13 +56,14 @@ namespace HighThroughputApi
                 options.OperationFilter<AddIfMatchHeaderOperationFilter>();
             });
 
-            //builder.Services.AddControllers();
             builder.Services.AddControllers()
                 .AddJsonOptions(opt =>
                 {
-                    //opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+                   // opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
                     opt.JsonSerializerOptions.WriteIndented = true;
                 });
+
+
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
