@@ -14,7 +14,8 @@ using HighThroughputApi.Interfaces;
 using HighThroughputApi.Repositories;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
-
+using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
 
 namespace HighThroughputApi
 {
@@ -59,7 +60,7 @@ namespace HighThroughputApi
             builder.Services.AddControllers()
                 .AddJsonOptions(opt =>
                 {
-                    opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+                    //opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
                     opt.JsonSerializerOptions.WriteIndented = true;
                 });
 
