@@ -1,7 +1,9 @@
-﻿using HighThroughputApi.Dtos;
+﻿using Azure;
+using HighThroughputApi.Dtos;
 using HighThroughputApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using HighThroughputApi.Helpers;
 
 namespace HighThroughputApi.Controllers
 {
@@ -23,6 +25,8 @@ namespace HighThroughputApi.Controllers
             var customer = await _context.Customers.Where(c => c.Email == dto.Email).FirstOrDefaultAsync();
             if (customer == null)
                 return NotFound();
+
+            Response.Headers["ETag"] = customer.RowVersion.ToEtag();
 
             return new CreateCustomerDto
             {
@@ -48,22 +52,6 @@ namespace HighThroughputApi.Controllers
                 Email = customer.Email
             });
         }
-
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<CreateCustomerDto>>> GetAllCustomers()
-        //{
-        //    var customers = await _context.Customers.ToListAsync();
-
-        //    return customers
-        //        .Select(c => new CreateCustomerDto
-        //        {
-        //            Id = c.Id,
-        //            FirstName = c.FirstName,
-        //            LastName = c.LastName,
-        //            Email = c.Email
-        //        })
-        //        .ToList();
-        //}
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
