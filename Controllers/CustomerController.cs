@@ -26,7 +26,6 @@ namespace HighThroughputApi.Controllers
             if (customer == null)
                 return NotFound();
 
-            Response.Headers["ETag"] = customer.RowVersion.ToEtag();
 
             return new CreateCustomerDto
             {
