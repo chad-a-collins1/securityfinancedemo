@@ -17,10 +17,10 @@ namespace HighThroughputApi.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<CreateCustomerDto>> GetCustomer(string email)
+        [HttpPost]
+        public async Task<ActionResult<CreateCustomerDto>> GetCustomer([FromBody] CustomerDto dto)
         {
-            var customer = await _context.Customers.Where(c => c.Email == email).FirstOrDefaultAsync();
+            var customer = await _context.Customers.Where(c => c.Email == dto.Email).FirstOrDefaultAsync();
             if (customer == null)
                 return NotFound();
 
