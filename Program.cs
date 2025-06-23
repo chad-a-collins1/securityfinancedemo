@@ -70,6 +70,13 @@ namespace HighThroughputApi
 
             builder.Services.AddRateLimiter(options =>
             {
+
+                options.OnRejected = async (context, cancellationToken) =>
+                {
+                    context.HttpContext.Response.StatusCode = 429;
+                    await context.HttpContext.Response.WriteAsync("exceeded rate limit", cancellationToken);
+                };
+
                 options.AddFixedWindowLimiter(policyName: "fixed", config =>
                 {
                     config.Window = TimeSpan.FromSeconds(10);  // time window
@@ -112,7 +119,7 @@ namespace HighThroughputApi
 
             app.UseRateLimiter(); //middleware
 
-            app.MapControllers().RequireRateLimiting("fixed");
+            app.MapControllers().RequireRateLimiting("fixed"); 
 
             app.UseHttpsRedirection();
 
