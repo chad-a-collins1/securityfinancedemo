@@ -69,8 +69,18 @@ namespace HighThroughputApi.Controllers
             if (customer == null) return BadRequest("Invalid customer ID.");
 
             var order = await _orderRepository.CreateNewOrder(dto);
+            var orderDto = new
+            {
+                id = order.Id,
+                customerId = order.CustomerId,
+                orderItems = order.OrderItems.Select(oi => new
+                {
+                    itemId = oi.ItemId,
+                    quantity = oi.Quantity
+                })
+            };
 
-            return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
+            return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, orderDto);
         }
 
 
