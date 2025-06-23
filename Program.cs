@@ -89,6 +89,9 @@ namespace HighThroughputApi
                         .AllowAnyMethod());
             });
 
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline
@@ -106,10 +109,6 @@ namespace HighThroughputApi
                 db.Database.Migrate();
              
             }
-
-            builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
-
 
             app.UseRateLimiter(); //middleware
 
