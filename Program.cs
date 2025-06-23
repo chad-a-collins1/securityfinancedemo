@@ -107,7 +107,10 @@ namespace HighThroughputApi
              
             }
 
-            
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+
+
             app.UseRateLimiter(); //middleware
 
             app.MapControllers().RequireRateLimiting("fixed");
