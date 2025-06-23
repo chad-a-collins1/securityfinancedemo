@@ -10,5 +10,7 @@ namespace HighThroughputApi.Repositories
 
         public async Task<Customer?> GetByEmailAsync(string email) =>
             await _dbSet.FirstOrDefaultAsync(c => c.Email == email);
+
+
     }
 }
