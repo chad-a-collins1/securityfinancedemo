@@ -85,44 +85,44 @@ namespace HighThroughputApi.Controllers
 
 
 
-        //[HttpPatch("{id}")]
-        //public async Task<IActionResult> PatchOrder(int id, [FromHeader(Name = "If-Match")] string ifMatch, [FromBody] UpdateOrderDto dto)
-        //{
-        //    var order = await _context.Orders
-        //        .Include(o => o.OrderItems)
-        //        .FirstOrDefaultAsync(o => o.Id == id);
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchOrder(int id, [FromBody] UpdateOrderDto dto)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == id);
 
-        //    if (order == null)
-        //        return NotFound();
-
-
-        //    var clientVersion = Request.Headers["If-Match"].ToString().Trim('"');
-        //    var dbVersion = order.RowVersion.ToEtag();
-        //    if (clientVersion != dbVersion)
-        //        return StatusCode(StatusCodes.Status412PreconditionFailed, "ETag does not match current version.");
+            if (order == null)
+                return NotFound();
 
 
-        //    order.OrderItems.Clear();
-        //    foreach (var itemDto in dto.OrderItems)
-        //    {
-        //        order.OrderItems.Add(new OrderItem
-        //        {
-        //            ItemId = itemDto.ItemId,
-        //            Quantity = itemDto.Quantity
-        //        });
-        //    }
+            var clientVersion = Request.Headers["If-Match"].ToString();  
+            var dbVersion = order.RowVersion.ToEtag();
+            if (!dbVersion.Equals(clientVersion))
+                return StatusCode(StatusCodes.Status412PreconditionFailed, "ETag does not match current version.");
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        return StatusCode(StatusCodes.Status409Conflict, "Concurrency conflict.");
-        //    }
 
-        //    return NoContent();
-        //}
+            order.OrderItems.Clear();
+            foreach (var itemDto in dto.OrderItems)
+            {
+                order.OrderItems.Add(new OrderItem
+                {
+                    ItemId = itemDto.ItemId,
+                    Quantity = itemDto.Quantity
+                });
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(StatusCodes.Status409Conflict, "Concurrency conflict.");
+            }
+
+            return NoContent();
+        }
 
 
         [HttpPut]

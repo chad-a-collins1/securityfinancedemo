@@ -79,10 +79,10 @@ namespace HighThroughputApi
 
                 options.AddFixedWindowLimiter(policyName: "fixed", config =>
                 {
-                    config.Window = TimeSpan.FromSeconds(10);  // time window
-                    config.PermitLimit = 5;                     // max requests
+                    config.Window = TimeSpan.FromSeconds(10);  //time window
+                    config.PermitLimit = 5; //max limit on requests
                     config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                    config.QueueLimit = 2;                      // optional request queueing
+                    config.QueueLimit = 2;                     
                 });
             });
 
