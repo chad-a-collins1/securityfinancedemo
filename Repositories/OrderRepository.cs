@@ -24,12 +24,14 @@ namespace HighThroughputApi.Repositories
             await _dbSet
                 .Where(o => o.CustomerId == customerId)
                 .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Item)
                 .ToListAsync();
 
         public async Task<Order> GetOrderByOrderIdAsync(int orderId) =>
                         await _dbSet
                 .Where(o => o.Id == orderId)
                 .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Item)
                 .FirstOrDefaultAsync();
 
         public async Task<Order> CreateNewOrder(CreateOrderDto dto)

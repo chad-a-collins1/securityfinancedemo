@@ -30,10 +30,8 @@ namespace HighThroughputApi.Controllers
         [HttpGet("customer/{id}")]
         public async Task<ActionResult<List<OrderDto>>> GetOrdersByCustomer(int id)
         {
-            var orders = await _context.Orders
-                .Where(o => o.CustomerId == id)
-                .Include(o => o.OrderItems)
-                .ToListAsync();
+
+            var orders = await _orderRepository.GetOrdersByCustomerIdAsync(id);
 
             if (orders == null || !orders.Any())
                 return NotFound();
@@ -41,7 +39,7 @@ namespace HighThroughputApi.Controllers
             var orderDtos = orders.Select(order => new OrderDto
             {
                 Id = order.Id,
-                OrderItems = order.OrderItems.Select(oi => new OrderItemDto(oi.ItemId, oi.Quantity)).ToList()
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDto(oi.ItemId, oi.Quantity, oi.Item.Name)).ToList()
                     
             }).ToList();
 
@@ -51,15 +49,27 @@ namespace HighThroughputApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
-            var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o => o.Id == id);
+
+            var order = await _orderRepository.GetOrderByOrderIdAsync(id);
 
             if (order == null)
                 return NotFound();
 
             Response.Headers["ETag"] = order.RowVersion.ToEtag();
-            return Ok(order);
+
+            var orderDto = new
+            {
+                id = order.Id,
+                customerId = order.CustomerId,
+                orderItems = order.OrderItems.Select(oi => new
+                {
+                    itemId = oi.ItemId,
+                    quantity = oi.Quantity,
+                    name = oi.Item.Name
+                })
+            };
+
+            return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, orderDto);
         }
 
         [HttpPost]
@@ -76,7 +86,8 @@ namespace HighThroughputApi.Controllers
                 orderItems = order.OrderItems.Select(oi => new
                 {
                     itemId = oi.ItemId,
-                    quantity = oi.Quantity
+                    quantity = oi.Quantity,
+                    name = oi.Item.Name
                 })
             };
 
