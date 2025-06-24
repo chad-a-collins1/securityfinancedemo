@@ -2,4 +2,4 @@
 
 namespace HighThroughputApi.Models.Dtos;
 
-public record UpdateOrderDto(Collection<OrderItemDto> OrderItems);
+public record UpdateOrderDto(Collection<OrderItemDto> Items);
