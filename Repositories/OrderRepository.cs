@@ -67,7 +67,7 @@ namespace HighThroughputApi.Repositories
                 try
                 {
                     //Add or Subtract Stock
-                    foreach (var updateOrderItem in updatedOrderDto.OrderItems)
+                    foreach (var updateOrderItem in updatedOrderDto.Items)
                     {
                         var existing = existingOrder.OrderItems.Where(i => i.ItemId == updateOrderItem.ItemId).FirstOrDefault();
                         var id = updateOrderItem.ItemId;

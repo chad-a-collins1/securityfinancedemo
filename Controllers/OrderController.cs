@@ -114,7 +114,7 @@ namespace HighThroughputApi.Controllers
 
 
             order.OrderItems.Clear();
-            foreach (var itemDto in dto.OrderItems)
+            foreach (var itemDto in dto.Items)
             {
                 order.OrderItems.Add(new OrderItem
                 {
