@@ -96,7 +96,7 @@ namespace HighThroughputApi.Controllers
 
 
 
-        [HttpPatch("{id}")]
+        [HttpPatch]
         public async Task<IActionResult> PatchOrder(int id, [FromBody] UpdateOrderDto dto)
         {
             var order = await _context.Orders
