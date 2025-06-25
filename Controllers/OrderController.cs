@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using HighThroughputApi.Interfaces;
+using StackExchange.Redis;
 
 
 namespace HighThroughputApi.Controllers
@@ -47,7 +48,7 @@ namespace HighThroughputApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrder(int id)
+        public async Task<ActionResult<Models.Order>> GetOrder(int id)
         {
 
             var order = await _orderRepository.GetOrderByOrderIdAsync(id);
@@ -113,19 +114,20 @@ namespace HighThroughputApi.Controllers
                 return StatusCode(StatusCodes.Status412PreconditionFailed, "ETag does not match current version.");
 
 
-            order.OrderItems.Clear();
-            foreach (var itemDto in dto.Items)
-            {
-                order.OrderItems.Add(new OrderItem
-                {
-                    ItemId = itemDto.ItemId,
-                    Quantity = itemDto.Quantity
-                });
-            }
-
+            //order.OrderItems.Clear();
+            //foreach (var itemDto in dto.Items)
+            //{
+            //    order.OrderItems.Add(new OrderItem
+            //    {
+            //        ItemId = itemDto.ItemId,
+            //        Quantity = itemDto.Quantity
+            //    });
+            //}
             try
             {
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
+                var updatedOrder = await _orderRepository.UpdateOrderAsync(id, dto);
+                return Ok(updatedOrder);
             }
             catch (DbUpdateConcurrencyException)
             {
