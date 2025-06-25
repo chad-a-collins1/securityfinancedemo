@@ -155,7 +155,7 @@ namespace HighThroughputApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _orderRepository.GetOrderByOrderIdAsync(id);
             if (order == null) return NotFound();
 
             var current = order.RowVersion.ToEtag();
