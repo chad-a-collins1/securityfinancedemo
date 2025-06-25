@@ -116,7 +116,14 @@ namespace HighThroughputApi.Controllers
             var newETag = updatedOrder.RowVersion.ToEtag();
             Response.Headers["ETag"] = newETag;
 
-            return Ok(updatedOrder);
+            var orderDto =  new OrderDto
+            {
+                Id = order.Id,
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDto(oi.Id, oi.ItemId, oi.Quantity, oi.Item.Name)).ToList(),
+                Etag = newETag
+            };
+
+            return Ok(orderDto);
 
         }
 
