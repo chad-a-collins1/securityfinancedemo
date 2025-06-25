@@ -84,7 +84,7 @@ namespace HighThroughputApi.Repositories
                             await _itemService.ReshelfItemAsync(id, quantityDelta); //add back to the inventory
                         }
 
-                        var modifiedItem = await _orderItemRepository.GetByItemIdAsync(updateOrderItem.ItemId);
+                        var modifiedItem = await _orderItemRepository.GetByItemIdAsync(updateOrderItem.OrderItemId);
                         if (modifiedItem != null)
                         {
                             modifiedItem.Quantity = updateOrderItem.Quantity;

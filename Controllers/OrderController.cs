@@ -40,7 +40,7 @@ namespace HighThroughputApi.Controllers
             var orderDtos = orders.Select(order => new OrderDto
             {
                 Id = order.Id,
-                OrderItems = order.OrderItems.Select(oi => new OrderItemDto(oi.ItemId, oi.Quantity, oi.Item.Name)).ToList(),
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDto(oi.Id, oi.ItemId, oi.Quantity, oi.Item.Name)).ToList(),
                 Etag = Convert.ToBase64String(order.RowVersion)
             }).ToList();
 

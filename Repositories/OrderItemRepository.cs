@@ -9,9 +9,9 @@ namespace HighThroughputApi.Repositories
     {
         public OrderItemRepository(AppDbContext context) : base(context) {}
 
-        public async Task<OrderItem> GetByItemIdAsync(int itemId) =>
+        public async Task<OrderItem> GetByItemIdAsync(int orderitemId) =>
         await _dbSet
-                .Where(o => o.ItemId == itemId)
+                .Where(o => o.Id == orderitemId)
                 .FirstOrDefaultAsync();
 
     }
