@@ -171,7 +171,7 @@ namespace HighThroughputApi.Controllers
             _context.Orders.Remove(order);
             var success = await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(true);
         }
     }
 }
