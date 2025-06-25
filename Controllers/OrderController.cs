@@ -107,34 +107,17 @@ namespace HighThroughputApi.Controllers
             if (order == null)
                 return NotFound();
 
-
             var clientVersion = Request.Headers["If-Match"].ToString();  
             var dbVersion = order.RowVersion.ToEtag();
             if (!dbVersion.Equals(clientVersion))
                 return StatusCode(StatusCodes.Status412PreconditionFailed, "ETag does not match current version.");
 
+            var updatedOrder = await _orderRepository.UpdateOrderAsync(id, dto);
+            var newETag = updatedOrder.RowVersion.ToEtag();
+            Response.Headers["ETag"] = newETag;
 
-            //order.OrderItems.Clear();
-            //foreach (var itemDto in dto.Items)
-            //{
-            //    order.OrderItems.Add(new OrderItem
-            //    {
-            //        ItemId = itemDto.ItemId,
-            //        Quantity = itemDto.Quantity
-            //    });
-            //}
-            try
-            {
-                //await _context.SaveChangesAsync();
-                var updatedOrder = await _orderRepository.UpdateOrderAsync(id, dto);
-                return Ok(updatedOrder);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(StatusCodes.Status409Conflict, "Concurrency conflict.");
-            }
+            return Ok(updatedOrder);
 
-            return NoContent();
         }
 
 
