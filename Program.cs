@@ -64,7 +64,8 @@ namespace HighThroughputApi
 
             builder.Services.AddControllers()
                 .AddJsonOptions(opt =>
-                {
+                { 
+                   //// removed this so the json response is clean and matches the dtos
                    // opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
                     opt.JsonSerializerOptions.WriteIndented = true;
                 });
