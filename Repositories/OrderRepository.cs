@@ -1,42 +1,78 @@
 ﻿using HighThroughputApi.Interfaces;
 using HighThroughputApi.Services;
 using HighThroughputApi.Models;
+using HighThroughputApi.Helpers;
 using Microsoft.EntityFrameworkCore;
 using HighThroughputApi.Models.Dtos;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using StackExchange.Redis;
 
 namespace HighThroughputApi.Repositories
 {
-    public class OrderRepository : BaseRepository<Order>, IOrderRepository
+    public class OrderRepository : BaseRepository<Models.Order>, IOrderRepository
     {
         readonly ItemService _itemService;
         readonly IOrderItemRepository _orderItemRepository;
-        
-        public OrderRepository(AppDbContext context, ItemService itemService, IOrderItemRepository orderItemRepository)
-            : base(context) 
-        { 
-           _itemService = itemService;
-            _orderItemRepository = orderItemRepository; 
+        private readonly IDistributedCache _cache;
+        private static readonly TimeSpan OrderTtl = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan CustomerListTtl = TimeSpan.FromMinutes(3);
+        private static string CacheKey_Order(int orderId) => $"order:{orderId}";
+        private static string CacheKey_Customer(int customerId) => $"customer:{customerId}:orders";
+
+        public OrderRepository(
+            AppDbContext context,
+            ItemService itemService,
+            IOrderItemRepository orderItemRepository,
+            IDistributedCache cache)           
+            : base(context)
+        {
+            _itemService = itemService;
+            _orderItemRepository = orderItemRepository;
+            _cache = cache;
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersByCustomerIdAsync(int customerId) =>
-            await _dbSet
+
+        public async Task<IEnumerable<Models.Order>> GetOrdersByCustomerIdAsync(int customerId)
+        {
+            var cached = await RedisCacheHelper.GetFromCacheAsync<List<Models.Order>>( _cache, CacheKey_Customer(customerId));
+            if (cached is not null) return cached;
+
+            var orders = await _dbSet
                 .Where(o => o.CustomerId == customerId)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Item)
                 .ToListAsync();
 
-        public async Task<Order> GetOrderByOrderIdAsync(int orderId) =>
-                        await _dbSet
-                .Where(o => o.Id == orderId)
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Item)
-                .FirstOrDefaultAsync();
+            await RedisCacheHelper.SetCacheAsync(_cache, CacheKey_Customer(customerId),orders, CustomerListTtl);
+            return orders;
+        }
 
-        public async Task<Order> CreateNewOrder(CreateOrderDto dto)
+
+        public async Task<Models.Order> GetOrderByOrderIdAsync(int orderId)
         {
-            var order = new Order
+            var cached = await RedisCacheHelper.GetFromCacheAsync<Models.Order>(_cache, CacheKey_Order(orderId));
+            if (cached is not null) return cached;
+
+            var order = await _dbSet
+                    .Where(o => o.Id == orderId)
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                    .FirstOrDefaultAsync();
+
+            if (order is not null)
+                await RedisCacheHelper.SetCacheAsync(_cache, CacheKey_Order(orderId), order, OrderTtl);
+
+            return order;
+
+        }
+
+
+        public async Task<Models.Order> CreateNewOrder(CreateOrderDto dto)
+        {
+            var order = new Models.Order
             {
                 CustomerId = dto.CustomerId,
                 OrderItems = dto.OrderItems.Select(i => new OrderItem
@@ -51,15 +87,21 @@ namespace HighThroughputApi.Repositories
             if (success > 0)
             {
                 foreach (var item in order.OrderItems)
-                {
                     await _itemService.PurchaseItemAsync(item.ItemId, item.Quantity);
-                }
             }
 
-            return order;
+            // redis cache write‑through for single order 
+            await RedisCacheHelper.SetCacheAsync(_cache, CacheKey_Order(order.Id), order, OrderTtl);
+            // this is a lazy re-populat to invalidate the list for the customer who requests it
+            await RedisCacheHelper.RemoveCacheAsync(_cache, CacheKey_Customer(dto.CustomerId));
 
+            return order;
         }
-        public async Task<Order>? UpdateOrderAsync(int OrderId, UpdateOrderDto updatedOrderDto)
+
+
+
+
+        public async Task<Models.Order>? UpdateOrderAsync(int OrderId, UpdateOrderDto updatedOrderDto)
         {
             var existingOrder = await GetByIdAsync(OrderId);
             if (existingOrder != null)
@@ -93,9 +135,17 @@ namespace HighThroughputApi.Repositories
                         }
                     }
                     _dbSet.Update(existingOrder);
-                    await SaveChangesAsync();
+                    await _context.SaveChangesAsync();
 
-                    return await GetOrderByOrderIdAsync(OrderId);
+                    // refresh single order cache
+                    var fresh = await GetOrderByOrderIdAsync(OrderId);
+                    if (fresh is not null)
+                        await RedisCacheHelper.SetCacheAsync(_cache, CacheKey_Order(OrderId), fresh, OrderTtl);
+
+                    //invalidate list for that customer
+                    await RedisCacheHelper.RemoveCacheAsync(_cache, CacheKey_Customer(fresh!.CustomerId));
+
+                    return fresh;
                     
                 }
                 catch (DbUpdateConcurrencyException)

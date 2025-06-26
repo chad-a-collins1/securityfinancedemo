@@ -43,6 +43,12 @@ namespace HighThroughputApi
                 builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379");
             builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration.GetConnectionString("Redis");
+                options.InstanceName = "HighThroughputApi:"; 
+            });
+
             var redLockFactory = RedLockFactory.Create(new List<RedLockMultiplexer> { redis });
             builder.Services.AddSingleton<RedLockFactory>(redLockFactory);
             builder.Services.AddScoped<ItemService>();

@@ -4,6 +4,6 @@ namespace HighThroughputApi.Interfaces
 {
     public interface ICustomerRepository : IBaseRepository<Customer>
     {
-        Task<Customer?> GetByEmailAsync(string email);
+        Task<Customer?> GetByEmailAsync(string email, CancellationToken ct = default);
     }
 }
