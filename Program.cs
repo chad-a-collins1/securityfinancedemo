@@ -91,7 +91,7 @@ namespace HighThroughputApi
             {
                 options.AddPolicy("AllowAngularApp",
                     policy => policy
-                        .WithOrigins("http://45.33.28.119") // Angular dev server on ubuntu
+                        .WithOrigins("https://45.33.28.119") // Angular dev server on ubuntu
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
