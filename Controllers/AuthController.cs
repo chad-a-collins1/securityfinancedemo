@@ -11,7 +11,7 @@ using HighThroughputApi.Interfaces;
 namespace HighThroughputApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
