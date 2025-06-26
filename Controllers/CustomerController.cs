@@ -4,6 +4,7 @@ using HighThroughputApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HighThroughputApi.Helpers;
+using HighThroughputApi.Interfaces;
 
 namespace HighThroughputApi.Controllers
 {
@@ -13,16 +14,19 @@ namespace HighThroughputApi.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ICustomerRepository _customerRepository;
 
-        public CustomerController(AppDbContext context)
+        public CustomerController(AppDbContext context,ICustomerRepository customerRepository)
         {
             _context = context;
+            _customerRepository = customerRepository;   
         }
 
         [HttpPost("get-customer")]
         public async Task<ActionResult<CreateCustomerDto>> GetCustomer([FromBody] CustomerDto dto)
         {
-            var customer = await _context.Customers.Where(c => c.Email == dto.Email).FirstOrDefaultAsync();
+            //var customer = await _context.Customers.Where(c => c.Email == dto.Email).FirstOrDefaultAsync();
+            var customer = await _customerRepository.GetByEmailAsync(dto.Email);
             if (customer == null)
                 return NotFound();
 

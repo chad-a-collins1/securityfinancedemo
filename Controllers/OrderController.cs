@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using System;
 using HighThroughputApi.Interfaces;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace HighThroughputApi.Controllers
@@ -15,6 +16,7 @@ namespace HighThroughputApi.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -29,6 +31,7 @@ namespace HighThroughputApi.Controllers
         }
 
         [HttpGet("customer/{id}")]
+        [Authorize]
         public async Task<ActionResult<List<OrderDto>>> GetOrdersByCustomer(int id)
         {
 
@@ -48,6 +51,7 @@ namespace HighThroughputApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Models.Order>> GetOrder(int id)
         {
 
@@ -74,6 +78,7 @@ namespace HighThroughputApi.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
             var customer = await _context.Customers.FindAsync(dto.CustomerId);
@@ -98,6 +103,7 @@ namespace HighThroughputApi.Controllers
 
 
         [HttpPatch("{id}")]
+        [Authorize]
         public async Task<IActionResult> PatchOrder(int id, [FromBody] UpdateOrderDto dto)
         {
             var order = await _context.Orders
@@ -129,6 +135,7 @@ namespace HighThroughputApi.Controllers
 
 
         [HttpPut]
+        [Authorize]
         public async Task<IActionResult> UpdateOrder(int orderid, [FromBody] UpdateOrderDto updatedOrderDto)
         {
             var existingOrder = await _orderRepository.GetOrderByOrderIdAsync(orderid);
@@ -153,6 +160,7 @@ namespace HighThroughputApi.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             var order = await _orderRepository.GetOrderByOrderIdAsync(id);
