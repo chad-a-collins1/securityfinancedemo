@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Antiforgery;
 
 namespace HighThroughputApi
 {
@@ -53,6 +54,8 @@ namespace HighThroughputApi
 
             var redLockFactory = RedLockFactory.Create(new List<RedLockMultiplexer> { redis });
             builder.Services.AddSingleton<RedLockFactory>(redLockFactory);
+
+
             builder.Services.AddScoped<ItemService>();
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<IItemRepository, ItemRepository>();
@@ -141,15 +144,17 @@ namespace HighThroughputApi
                 });
             });
 
-
+            var angularUrl = builder.Configuration["NgUI:Url"];
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularApp",
                     policy => policy
-                        .WithOrigins("https://45.33.28.119") // Angular dev server on ubuntu
+                        .WithOrigins(angularUrl) // Angular dev server on ubuntu
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
+
+            builder.Services.AddAntiforgery();
 
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
@@ -166,6 +171,16 @@ namespace HighThroughputApi
             }
 
             app.UseCors("AllowAngularApp");
+
+            app.Use(async (context, next) =>
+            {
+                var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+                var tokens = antiforgery.GetAndStoreTokens(context);
+                context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!,
+                    new CookieOptions { HttpOnly = false, SameSite = SameSiteMode.Strict }); 
+                await next();
+            });
+
 
             using (var scope = app.Services.CreateScope())
             {

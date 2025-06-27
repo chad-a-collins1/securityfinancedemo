@@ -78,6 +78,7 @@ namespace HighThroughputApi.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
@@ -103,6 +104,7 @@ namespace HighThroughputApi.Controllers
 
 
         [HttpPatch("{id}")]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> PatchOrder(int id, [FromBody] UpdateOrderDto dto)
         {
@@ -135,6 +137,7 @@ namespace HighThroughputApi.Controllers
 
 
         [HttpPut]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> UpdateOrder(int orderid, [FromBody] UpdateOrderDto updatedOrderDto)
         {
@@ -160,6 +163,7 @@ namespace HighThroughputApi.Controllers
 
 
         [HttpDelete("{id}")]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> DeleteOrder(int id)
         {
